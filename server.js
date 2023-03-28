@@ -5,10 +5,12 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+
 const Book = require('./models/book.js');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
@@ -20,6 +22,35 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log('Mongoose is connected');
 });
+
+app.post('/books', postBooks);
+
+
+async function postBooks(request, response, next){
+  try {
+
+    let createdBook = await Book.create(request.body);
+    response.status(201).send(createdBook);
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+app.delete('/books/:bookID', delBook);
+
+async function delBook(request, response, next){
+  try {
+    let id = request.params.bookID;
+
+    await Book.findByIdAndDelete(id);
+
+    response.status(200).send('Book deleted!');
+  } catch (error) {
+    next(error);
+  }
+}
+
 
 
 
